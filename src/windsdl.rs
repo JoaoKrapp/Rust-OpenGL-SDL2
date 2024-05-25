@@ -1,6 +1,7 @@
 use sdl2::{EventPump, Sdl, VideoSubsystem};
-use sdl2::video::{GLContext, Window};
 
+
+use sdl2::video::{GLContext, Window};
 pub struct Winsdl {
     pub sdl : Sdl,
     pub window : Window,
@@ -37,3 +38,4 @@ impl Winsdl {
         });
     }
 }
+
