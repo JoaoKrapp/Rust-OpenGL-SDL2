@@ -1,10 +1,8 @@
 use sdl2::event::Event;
-use crate::winsdl::Winsdl;
+use crate::windsdl::Winsdl;
 
-mod winsdl;
-mod program;
+
 mod windsdl;
-mod program;
 
 
 const WIDTH : usize = 800;
