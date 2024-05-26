@@ -1,22 +1,23 @@
 use crate::graphics::{create_whitespace_cstring_with_len, Program, Shader};
+use gl;
 
 impl Program {
-    pub fn from_shaders(shaders: &[Shader]) -> Result<Program, String> {
+    pub fn from_shaders(gl : &gl::Gl, shaders: &[Shader]) -> Result<Program, String> {
         // Create program
-        let program_id = unsafe { gl::CreateProgram() };
+        let program_id = unsafe { gl.CreateProgram() };
 
         // For every shader in list given attach to the program
         for shader in shaders {
-            unsafe { gl::AttachShader(program_id, shader.id()); }
+            unsafe { gl.AttachShader(program_id, shader.id()); }
         }
 
         // Link the program to GL
-        unsafe { gl::LinkProgram(program_id); }
+        unsafe { gl.LinkProgram(program_id); }
 
         // Get status of linking the shader
         let mut success: gl::types::GLint = 1;
         unsafe {
-            gl::GetProgramiv(program_id, gl::LINK_STATUS, &mut success);
+            gl.GetProgramiv(program_id, gl::LINK_STATUS, &mut success);
         }
 
         // If it wasn't successful do error stuff
@@ -25,7 +26,7 @@ impl Program {
             // Get length of error message
             let mut len: gl::types::GLint = 0;
             unsafe {
-                gl::GetProgramiv(program_id, gl::INFO_LOG_LENGTH, &mut len);
+                gl.GetProgramiv(program_id, gl::INFO_LOG_LENGTH, &mut len);
             }
 
             // Make error variable made of b' ' of length of error
@@ -33,7 +34,7 @@ impl Program {
 
             // Put message into error variable
             unsafe {
-                gl::GetProgramInfoLog(
+                gl.GetProgramInfoLog(
                     program_id,
                     len,
                     std::ptr::null_mut(),
@@ -47,16 +48,16 @@ impl Program {
 
         // After linking the program without errors, detach from the program
         for shader in shaders {
-            unsafe { gl::DetachShader(program_id, shader.id()); }
+            unsafe { gl.DetachShader(program_id, shader.id()); }
         }
 
         // If everything went well returns the Program
-        Ok(Program { id: program_id })
+        Ok(Program { gl : gl.clone(),  id: program_id })
     }
 
     pub fn set_used(&self) {
         unsafe {
-            gl::UseProgram(self.id);
+            self.gl.UseProgram(self.id);
         }
     }
 
@@ -68,7 +69,7 @@ impl Program {
 impl Drop for Program {
     fn drop(&mut self) {
         unsafe {
-            gl::DeleteProgram(self.id);
+            self.gl.DeleteProgram(self.id);
         }
     }
 }

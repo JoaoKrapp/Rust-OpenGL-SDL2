@@ -1,30 +1,35 @@
 use std::ffi::{CStr, CString};
+use gl::types::GLuint;
+
+use gl;
 
 mod shader;
 mod program;
 
 pub struct Program {
-    id: gl::types::GLuint,
+    gl : gl::Gl,
+    id: GLuint,
 }
 
 pub struct Shader {
-    id: gl::types::GLuint,
+    gl : gl::Gl,
+    id: GLuint,
 }
 
 /// Given a source of shader and the type returns the shader ID
-fn shader_from_source(source : &CStr, kind : gl::types::GLuint) -> Result<gl::types::GLuint, String> {
-    let id = unsafe {
-        gl::CreateShader(kind)
+fn shader_from_source(gl : &gl::Gl, source : &CStr, kind : gl::types::GLuint) -> Result<gl::types::GLuint, String> {
+    let id : GLuint = unsafe {
+        gl.CreateShader(kind)
     };
 
     unsafe {
-        gl::ShaderSource(id, 1, &source.as_ptr(), std::ptr::null());
-        gl::CompileShader(id);
+        gl.ShaderSource(id, 1, &source.as_ptr(), std::ptr::null());
+        gl.CompileShader(id);
     }
 
     let mut success: gl::types::GLint = 1;
     unsafe {
-        gl::GetShaderiv(id, gl::COMPILE_STATUS, &mut success);
+        gl.GetShaderiv(id, gl::COMPILE_STATUS, &mut success);
     }
 
     // Couldn't create a shader
@@ -34,7 +39,7 @@ fn shader_from_source(source : &CStr, kind : gl::types::GLuint) -> Result<gl::ty
 
         // Pass the error length to the 'len' variable
         unsafe {
-            gl::GetShaderiv(id, gl::INFO_LOG_LENGTH, &mut len);
+            gl.GetShaderiv(id, gl::INFO_LOG_LENGTH, &mut len);
         }
 
         // Get CString with b' ' values of the size of the error
@@ -42,7 +47,7 @@ fn shader_from_source(source : &CStr, kind : gl::types::GLuint) -> Result<gl::ty
 
         unsafe {
             // Put error of the shader into variable error
-            gl::GetShaderInfoLog(
+            gl.GetShaderInfoLog(
                 id,
                 len,
                 std::ptr::null_mut(),
