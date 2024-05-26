@@ -1,13 +1,11 @@
 use std::ffi::{CStr, CString};
 use gl::types::GLsizei;
 use sdl2::event::Event;
-use crate::program::{Program, Shader};
+use crate::graphics::{Program, Shader};
 use crate::windsdl::Winsdl;
 
-
 mod windsdl;
-mod program;
-
+mod graphics;
 
 const WIDTH : usize = 800;
 const HEIGHT : usize = 600;
