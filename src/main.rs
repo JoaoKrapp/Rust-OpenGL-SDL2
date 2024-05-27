@@ -15,7 +15,10 @@ mod graphics;
 use graphics::{
     shader::*,
     resources::*,
-    program::*
+    program::*,
+    vbo::*,
+    vao::*,
+    ebo::*
 };
 
 
@@ -25,8 +28,6 @@ const HEIGHT : usize = 600;
 
 
 fn main() {
-
-    let sqrt_3: f32 = f32::sqrt(3.0);
 
     // Sdl window
     let mut windsdl = Winsdl::new(WIDTH, HEIGHT).unwrap();
@@ -74,71 +75,50 @@ fn main() {
       5, 4, 1       // Upper triangle
     ];
 
-    let mut vao: GLuint = 0;
-    let mut vbo : GLuint = 0;
-    let mut ebo : GLuint = 0;
+    let vao = VAO::new(&gl);
+    vao.bind();
+
+    let vbo = VBO::new(
+        &gl,
+        vertices
+    );
+
+    let ebo  = EBO::new(
+        &gl,
+        indices
+    );
+
+    // Link VAO to VBO
+
+    // Triangle coordinates
+    vao.link_vbo(
+        &vbo,
+        0,
+        3,
+        (6 * std::mem::size_of::<f32>()) as gl::types::GLint,
+        std::ptr::null()
+    );
+
+    // Triangle colors
+    vao.link_vbo(
+        &vbo,
+        1,
+        3,
+        (6 * std::mem::size_of::<f32>()) as gl::types::GLint,
+        (3 * std::mem::size_of::<f32>()) as *const gl::types::GLvoid
+    );
+
+    // Unbind everything
+
+    vao.unbind();
+    vbo.unbind();
+    ebo.unbind();
+
+
+
+
 
     unsafe {
-
-
-        // Generate the VAO, VBO, and EBO with only 1 object each
-        gl.GenVertexArrays(1, &mut vao);
-        gl.GenBuffers(1, &mut vbo);
-        gl.GenBuffers(1, &mut ebo);
-
-        // Use the VAO now
-
-        gl.BindVertexArray(vao);
-
-        // VBO stuff
-
-        gl.BindBuffer(gl::ARRAY_BUFFER, vbo);
-        gl.BufferData(
-            gl::ARRAY_BUFFER,
-            (vertices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
-            vertices.as_ptr() as *const gl::types::GLvoid,
-            gl::STATIC_DRAW
-        );
-
-        // EBO Stuff
-
-        gl.BindBuffer(gl::ELEMENT_ARRAY_BUFFER, ebo);
-        gl.BufferData(
-            gl::ELEMENT_ARRAY_BUFFER,
-            (indices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
-            indices.as_ptr() as *const gl::types::GLvoid,
-            gl::STATIC_DRAW
-        );
-
-        // VAO Stuff
-
-        // Code Coordinates
-        gl.EnableVertexAttribArray(0);
-        gl.VertexAttribPointer(
-            0,
-            3,
-            gl::FLOAT,
-            gl::FALSE,
-            (6 * std::mem::size_of::<f32>()) as gl::types::GLint,
-            std::ptr::null()
-        );
-
-        // Color Coordinates
-        gl.EnableVertexAttribArray(1);
-        gl.VertexAttribPointer(
-            1,
-            3,
-            gl::FLOAT,
-            gl::FALSE,
-            (6 * std::mem::size_of::<f32>()) as gl::types::GLint,
-            (3 * std::mem::size_of::<f32>()) as *const gl::types::GLvoid
-        );
-
-        // Unbind everything
-        gl.BindBuffer(gl::ARRAY_BUFFER, 0);            // VBO
-        gl.BindVertexArray(0);                          // VAO
-        gl.BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0);    // EBO
-
         // Background color
         gl.Viewport(0, 0, WIDTH as GLsizei, HEIGHT as GLsizei);
         gl.ClearColor(0.3, 0.3, 0.5, 1.0);
@@ -162,7 +142,7 @@ fn main() {
 
         shader_program.set_used();
         unsafe {
-            gl.BindVertexArray(vao);
+            gl.BindVertexArray(vao.id);
             gl.DrawElements(
                 gl::TRIANGLES,
                 9,
