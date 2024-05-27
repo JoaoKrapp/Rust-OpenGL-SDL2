@@ -27,7 +27,7 @@ impl Shader {
         Shader::from_source(gl, source, gl::FRAGMENT_SHADER)
     }
 
-    pub fn _from_res(gl: &gl::Gl, res: &Resources, name: &str) -> Result<Shader, String> {
+    pub fn from_res(gl: &gl::Gl, res: &Resources, name: &str) -> Result<Shader, String> {
         const POSSIBLE_EXT: [(&str, gl::types::GLenum); 2] = [
             (".vert", gl::VERTEX_SHADER),
             (".frag", gl::FRAGMENT_SHADER),

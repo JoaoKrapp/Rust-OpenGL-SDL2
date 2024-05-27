@@ -1,7 +1,7 @@
 #![allow(warnings)]
 
 use std::ffi::{CString};
-use gl::types::GLsizei;
+use gl::types::{GLsizei, GLuint};
 use sdl2::event::Event;
 
 use crate::windsdl::Winsdl;
@@ -18,12 +18,15 @@ use graphics::{
     program::*
 };
 
+
 const WIDTH : usize = 800;
 const HEIGHT : usize = 600;
 
 
+
 fn main() {
 
+    let sqrt_3: f32 = f32::sqrt(3.0);
 
     // Sdl window
     let mut windsdl = Winsdl::new(WIDTH, HEIGHT).unwrap();
@@ -50,73 +53,97 @@ fn main() {
         &[vert_shader, frag_shader]
     ).unwrap();
 
-    // Load objects
+    // Load vertices
     let vertices: Vec<f32> = vec![
-        // positions      // colors
-        0.5, -0.5, 0.0,   1.0, 0.0, 0.0,   // bottom right
-        -0.5, -0.5, 0.0,  0.0, 1.0, 0.0,   // bottom left
-        0.0,  0.5, 0.0,   0.0, 0.0, 1.0    // top
+        // positions                                            // colors
+
+        // X        // Y                        // Z
+        -0.5,       -0.5 * sqrt_3      / 3.0    , 0.0,                  1.0, 0.0, 0.0,      // Lower left corner
+        0.5,        -0.5 * sqrt_3      / 3.0    , 0.0,                  0.0, 1.0, 0.0,      // Lower right corner
+        0.0,         0.5 * sqrt_3 * 2.0 / 3.0   , 0.0,                  0.0, 0.0, 1.0,      // Upper corner
+
+        -0.5 / 2.0,  0.5 * sqrt_3 / 6.0         , 0.0,                 0.5, 0.5, 0.5,      // Inner left
+         0.5 / 2.0,  0.5 * sqrt_3 / 6.0         , 0.0,                 0.5, 0.5, 0.5,      // Inner right
+         0.0,       -0.5 * sqrt_3 / 3.0         , 0.0,                 0.5, 0.5, 0.5,      // Inner down
+
     ];
 
-    // Vertex Buffer Object
-    let mut vbo: gl::types::GLuint = 0;
+    let indices : Vec<GLuint> = vec![
+      0, 3, 5,      // Lower left triangle
+      3, 2, 4,      // Lower right triangle
+      5, 4, 1       // Upper triangle
+    ];
+
+    let mut vao: GLuint = 0;
+    let mut vbo : GLuint = 0;
+    let mut ebo : GLuint = 0;
+
     unsafe {
-        gl.GenBuffers(1, &mut vbo);
-    }
 
 
-
-    unsafe {
-        gl.BindBuffer(gl::ARRAY_BUFFER, vbo);
-
-        gl.BufferData(
-            gl::ARRAY_BUFFER,                                                                   // What the data is
-            (vertices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,        // size of data in bytes
-            vertices.as_ptr() as *const gl::types::GLvoid,                                      // pointer to data
-            gl::STATIC_DRAW,                                                                    // type of usage
-        );
-
-        gl.BindBuffer(gl::ARRAY_BUFFER, 0);                                             // unbind the buffer
-    }
-
-    // Create VAO (Vertex Array Object)
-    let mut vao: gl::types::GLuint = 0;
-    unsafe {
+        // Generate the VAO, VBO, and EBO with only 1 object each
         gl.GenVertexArrays(1, &mut vao);
-    }
+        gl.GenBuffers(1, &mut vbo);
+        gl.GenBuffers(1, &mut ebo);
 
-    unsafe {
+        // Use the VAO now
+
         gl.BindVertexArray(vao);
+
+        // VBO stuff
+
         gl.BindBuffer(gl::ARRAY_BUFFER, vbo);
-
-        gl.EnableVertexAttribArray(0); // this is "layout (location = 0)" in vertex shader
-        gl.VertexAttribPointer(
-            0, // index of the generic vertex attribute ("layout (location = 0)")
-            3, // the number of components per generic vertex attribute
-            gl::FLOAT, // data type
-            gl::FALSE, // normalized (int-to-float conversion)
-            (6 * std::mem::size_of::<f32>()) as gl::types::GLint, // stride (byte offset between consecutive attributes)
-            std::ptr::null() // offset of the first component
+        gl.BufferData(
+            gl::ARRAY_BUFFER,
+            (vertices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
+            vertices.as_ptr() as *const gl::types::GLvoid,
+            gl::STATIC_DRAW
         );
 
-        gl.EnableVertexAttribArray(1); // this is "layout (location = 1)" in vertex shader
-        gl.VertexAttribPointer(
-            1, // index of the generic vertex attribute ("layout (location = 0)")
-            3, // the number of components per generic vertex attribute
-            gl::FLOAT, // data type
-            gl::FALSE, // normalized (int-to-float conversion)
-            (6 * std::mem::size_of::<f32>()) as gl::types::GLint, // stride (byte offset between consecutive attributes)
-            (3 * std::mem::size_of::<f32>()) as *const gl::types::GLvoid // offset of the first component
+        // EBO Stuff
+
+        gl.BindBuffer(gl::ELEMENT_ARRAY_BUFFER, ebo);
+        gl.BufferData(
+            gl::ELEMENT_ARRAY_BUFFER,
+            (indices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
+            indices.as_ptr() as *const gl::types::GLvoid,
+            gl::STATIC_DRAW
         );
 
-        gl.BindBuffer(gl::ARRAY_BUFFER, 0);
-        gl.BindVertexArray(0);
-    }
+        // VAO Stuff
 
-    unsafe {
+        // Code Coordinates
+        gl.EnableVertexAttribArray(0);
+        gl.VertexAttribPointer(
+            0,
+            3,
+            gl::FLOAT,
+            gl::FALSE,
+            (6 * std::mem::size_of::<f32>()) as gl::types::GLint,
+            std::ptr::null()
+        );
+
+        // Color Coordinates
+        gl.EnableVertexAttribArray(1);
+        gl.VertexAttribPointer(
+            1,
+            3,
+            gl::FLOAT,
+            gl::FALSE,
+            (6 * std::mem::size_of::<f32>()) as gl::types::GLint,
+            (3 * std::mem::size_of::<f32>()) as *const gl::types::GLvoid
+        );
+
+        // Unbind everything
+        gl.BindBuffer(gl::ARRAY_BUFFER, 0);            // VBO
+        gl.BindVertexArray(0);                          // VAO
+        gl.BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0);    // EBO
+
+        // Background color
         gl.Viewport(0, 0, WIDTH as GLsizei, HEIGHT as GLsizei);
         gl.ClearColor(0.3, 0.3, 0.5, 1.0);
     }
+
 
     'running : loop {
 
@@ -136,10 +163,12 @@ fn main() {
         shader_program.set_used();
         unsafe {
             gl.BindVertexArray(vao);
-            gl.DrawArrays(
-                gl::TRIANGLES, // mode
-                0, // starting index in the enabled arrays
-                3 // number of indices to be rendered
+            gl.DrawElements(
+                gl::TRIANGLES,
+                9,
+                gl::UNSIGNED_INT,
+                0 as *const _
+
             );
         }
 

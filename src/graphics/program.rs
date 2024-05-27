@@ -73,9 +73,10 @@ impl Program {
         }
     }
 
-    pub fn _id(&self) -> GLuint {
+    pub fn id(&self) -> GLuint {
         self.id
     }
+
 }
 
 impl Drop for Program {
