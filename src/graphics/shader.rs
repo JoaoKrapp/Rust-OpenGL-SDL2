@@ -1,5 +1,13 @@
-use std::ffi::{CStr, CString};
-use crate::graphics::{Shader, shader_from_source};
+use std::ffi::{CStr};
+use gl::types::GLuint;
+
+use crate::graphics::shader_from_source;
+use crate::Resources;
+
+pub struct Shader {
+    gl : gl::Gl,
+    id: GLuint,
+}
 
 impl Shader {
     pub fn from_source(gl : &gl::Gl, source : &CStr, kind: gl::types::GLenum) -> Result<Shader, String> {
@@ -7,7 +15,7 @@ impl Shader {
         Ok(Shader { gl : gl.clone() ,id })
     }
 
-    pub fn id(&self) -> gl::types::GLuint {
+    pub fn id(&self) -> GLuint {
         self.id
     }
 
@@ -19,6 +27,25 @@ impl Shader {
         Shader::from_source(gl, source, gl::FRAGMENT_SHADER)
     }
 
+    pub fn _from_res(gl: &gl::Gl, res: &Resources, name: &str) -> Result<Shader, String> {
+        const POSSIBLE_EXT: [(&str, gl::types::GLenum); 2] = [
+            (".vert", gl::VERTEX_SHADER),
+            (".frag", gl::FRAGMENT_SHADER),
+        ];
+
+        let shader_kind = POSSIBLE_EXT.iter()
+            .find(|&&(file_extension, _)| {
+                name.ends_with(file_extension)
+            })
+            .map(|&(_, kind)| kind)
+            .ok_or_else(|| format!("Can not determine shader type for resource {}", name))?;
+
+        let source = res.load_cstring(name)
+            .map_err(|e| format!("Error loading resource {}: {:?}", name, e))?;
+
+        Shader::from_source(gl, &source, shader_kind)
+    }
+
 }
 
 impl Drop for Shader {
@@ -28,5 +55,7 @@ impl Drop for Shader {
         }
     }
 }
+
+
 
 

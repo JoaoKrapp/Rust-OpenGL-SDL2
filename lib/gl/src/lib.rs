@@ -3,6 +3,7 @@ mod bindings {
 }
 
 use std::ops::Deref;
+
 pub use bindings::*;
 
 use std::rc::Rc;

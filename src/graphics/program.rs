@@ -1,5 +1,17 @@
-use crate::graphics::{create_whitespace_cstring_with_len, Program, Shader};
+
 use gl;
+use gl::types::GLuint;
+
+use crate::graphics::{
+    create_whitespace_cstring_with_len,
+};
+
+use crate::Shader;
+
+pub struct Program {
+    gl : gl::Gl,
+    id: GLuint,
+}
 
 impl Program {
     pub fn from_shaders(gl : &gl::Gl, shaders: &[Shader]) -> Result<Program, String> {
@@ -61,7 +73,7 @@ impl Program {
         }
     }
 
-    pub fn id(&self) -> gl::types::GLuint {
+    pub fn _id(&self) -> GLuint {
         self.id
     }
 }

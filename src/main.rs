@@ -1,19 +1,29 @@
+#![allow(warnings)]
+
 use std::ffi::{CString};
 use gl::types::GLsizei;
 use sdl2::event::Event;
-use crate::graphics::{Program, Shader};
+
 use crate::windsdl::Winsdl;
 
 extern crate gl;
 
 mod windsdl;
+
 mod graphics;
+
+use graphics::{
+    shader::*,
+    resources::*,
+    program::*
+};
 
 const WIDTH : usize = 800;
 const HEIGHT : usize = 600;
 
 
 fn main() {
+
 
     // Sdl window
     let mut windsdl = Winsdl::new(WIDTH, HEIGHT).unwrap();
@@ -27,12 +37,12 @@ fn main() {
     // Load Shaders
     let vert_shader = Shader::from_vert_source(
         &gl,
-      &CString::new(include_str!("triangle.vert")).unwrap()
+      &CString::new(include_str!("../assets/shaders/triangle.vert")).unwrap()
     ).unwrap();
 
     let frag_shader = Shader::from_frag_source(
         &gl,
-        &CString::new(include_str!("triangle.frag")).unwrap()
+        &CString::new(include_str!("../assets/shaders/triangle.frag")).unwrap()
     ).unwrap();
 
     let shader_program = Program::from_shaders(
@@ -54,14 +64,18 @@ fn main() {
         gl.GenBuffers(1, &mut vbo);
     }
 
+
+
     unsafe {
         gl.BindBuffer(gl::ARRAY_BUFFER, vbo);
+
         gl.BufferData(
             gl::ARRAY_BUFFER,                                                                   // What the data is
             (vertices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,        // size of data in bytes
             vertices.as_ptr() as *const gl::types::GLvoid,                                      // pointer to data
             gl::STATIC_DRAW,                                                                    // type of usage
         );
+
         gl.BindBuffer(gl::ARRAY_BUFFER, 0);                                             // unbind the buffer
     }
 

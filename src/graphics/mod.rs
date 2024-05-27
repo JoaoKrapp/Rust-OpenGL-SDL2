@@ -1,20 +1,9 @@
 use std::ffi::{CStr, CString};
 use gl::types::GLuint;
 
-use gl;
-
-mod shader;
-mod program;
-
-pub struct Program {
-    gl : gl::Gl,
-    id: GLuint,
-}
-
-pub struct Shader {
-    gl : gl::Gl,
-    id: GLuint,
-}
+pub mod program;
+pub mod shader;
+pub mod resources;
 
 /// Given a source of shader and the type returns the shader ID
 fn shader_from_source(gl : &gl::Gl, source : &CStr, kind : gl::types::GLuint) -> Result<gl::types::GLuint, String> {
