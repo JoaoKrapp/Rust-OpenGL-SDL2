@@ -57,14 +57,14 @@ fn main() {
     let vertices: Vec<f32> = vec![
         // positions                                            // colors
 
-        // X        // Y                        // Z
-        -0.5,       -0.5 * sqrt_3      / 3.0    , 0.0,                  1.0, 0.0, 0.0,      // Lower left corner
-        0.5,        -0.5 * sqrt_3      / 3.0    , 0.0,                  0.0, 1.0, 0.0,      // Lower right corner
-        0.0,         0.5 * sqrt_3 * 2.0 / 3.0   , 0.0,                  0.0, 0.0, 1.0,      // Upper corner
+        // X   // Y  // Z
+        -0.5,  -0.5 , 0.0,                  1.0, 0.0, 0.0,      // Lower left corner
+        0.5,   -0.5 , 0.0,                  0.0, 1.0, 0.0,      // Lower right corner
+        0.0,    0.5 , 0.0,                  0.0, 0.0, 1.0,      // Upper corner
 
-        -0.5 / 2.0,  0.5 * sqrt_3 / 6.0         , 0.0,                 0.5, 0.5, 0.5,      // Inner left
-         0.5 / 2.0,  0.5 * sqrt_3 / 6.0         , 0.0,                 0.5, 0.5, 0.5,      // Inner right
-         0.0,       -0.5 * sqrt_3 / 3.0         , 0.0,                 0.5, 0.5, 0.5,      // Inner down
+        -0.25,  0.0 , 0.0,                 0.0, 0.5, 0.5,      // Inner left
+         0.25,  0.0 , 0.0,                 0.5, 0.0, 0.5,      // Inner right
+         0.0,  -0.5 , 0.0,                 0.5, 0.5, 0.0,      // Inner down
 
     ];
 
