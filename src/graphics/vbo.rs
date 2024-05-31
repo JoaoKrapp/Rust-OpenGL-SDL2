@@ -1,5 +1,5 @@
 use gl;
-use gl::types::{GLuint, GLfloat, GLsizeiptr};
+use gl::types::{GLuint, GLsizeiptr};
 
 pub struct VBO {
     gl : gl::Gl,

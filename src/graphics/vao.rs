@@ -1,4 +1,4 @@
-use gl::types::{GLsizeiptr, GLuint, GLint, GLsizei, GLvoid};
+use gl::types::{GLuint, GLint, GLsizei, GLvoid};
 use crate::graphics::vbo::VBO;
 
 pub struct VAO {
@@ -20,12 +20,12 @@ impl VAO {
 
     }
 
-    pub fn link_vbo(&self,
-                    vbo : &VBO,
-                    layout : GLuint,
-                    size : GLint,
-                    stride : GLsizei,
-                    pointer : *const GLvoid){
+    pub fn link_attrib(&self,
+                       vbo : &VBO,
+                       layout : GLuint,
+                       size : GLint,
+                       stride : GLsizei,
+                       pointer : *const GLvoid){
         vbo.bind();
         unsafe {
             self.gl.EnableVertexAttribArray(layout);

@@ -1,7 +1,7 @@
 #![allow(warnings)]
 
 use std::ffi::{CString};
-use gl::types::{GLsizei, GLuint};
+use gl::types::{GLchar, GLsizei, GLuint, GLint};
 use sdl2::event::Event;
 
 use crate::windsdl::Winsdl;
@@ -56,16 +56,16 @@ fn main() {
 
     // Load vertices
     let vertices: Vec<f32> = vec![
-        // positions                                            // colors
+        // positions                        // colors
 
         // X   // Y  // Z
         -0.5,  -0.5 , 0.0,                  1.0, 0.0, 0.0,      // Lower left corner
         0.5,   -0.5 , 0.0,                  0.0, 1.0, 0.0,      // Lower right corner
         0.0,    0.5 , 0.0,                  0.0, 0.0, 1.0,      // Upper corner
 
-        -0.25,  0.0 , 0.0,                 0.0, 0.5, 0.5,      // Inner left
-         0.25,  0.0 , 0.0,                 0.5, 0.0, 0.5,      // Inner right
-         0.0,  -0.5 , 0.0,                 0.5, 0.5, 0.0,      // Inner down
+        -0.25,  0.0 , 0.0,                  0.0, 0.5, 0.5,      // Inner left
+         0.25,  0.0 , 0.0,                  0.5, 0.0, 0.5,      // Inner right
+         0.0,  -0.5 , 0.0,                  0.5, 0.5, 0.0,      // Inner down
 
     ];
 
@@ -91,7 +91,7 @@ fn main() {
     // Link VAO to VBO
 
     // Triangle coordinates
-    vao.link_vbo(
+    vao.link_attrib(
         &vbo,
         0,
         3,
@@ -100,7 +100,7 @@ fn main() {
     );
 
     // Triangle colors
-    vao.link_vbo(
+    vao.link_attrib(
         &vbo,
         1,
         3,
@@ -114,7 +114,13 @@ fn main() {
     vbo.unbind();
     ebo.unbind();
 
+    let mut uni_id : GLint;
 
+    unsafe {
+        let name = CString::new(String::from("scale")).expect("CString::new failed");
+        uni_id = gl.GetUniformLocation(shader_program.id(), name.as_ptr()) ;
+
+    }
 
 
 
@@ -142,6 +148,8 @@ fn main() {
 
         shader_program.set_used();
         unsafe {
+            gl.Uniform1f(uni_id, 1.5);
+
             gl.BindVertexArray(vao.id);
             gl.DrawElements(
                 gl::TRIANGLES,
