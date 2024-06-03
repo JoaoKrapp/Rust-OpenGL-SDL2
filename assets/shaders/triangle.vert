@@ -7,6 +7,10 @@ layout (location = 2) in vec2 Texture;
 
 uniform float scale;
 
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 proj;
+
 out VS_OUTPUT {
     vec3 Color;
     vec2 Texture;
@@ -14,7 +18,7 @@ out VS_OUTPUT {
 
 void main()
 {
-    gl_Position = vec4(Position.x * scale, Position.y * scale, Position.z * scale, 1.0);
+    gl_Position = proj * view * model * vec4(Position.x * scale, Position.y * scale, Position.z * scale, 1.0);
     OUT.Color = Color;
     OUT.Texture = Texture;
 }

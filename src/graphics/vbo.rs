@@ -7,7 +7,7 @@ pub struct VBO {
 }
 
 impl VBO {
-    pub fn new(gl : &gl::Gl, vertices : Vec<f32>) -> VBO{
+    pub fn new(gl : &gl::Gl, vertices : &Vec<f32>) -> VBO{
         let mut vbo : GLuint = 0;
 
         unsafe {

@@ -6,7 +6,7 @@ pub struct EBO {
 }
 
 impl EBO{
-    pub fn new(gl : &gl::Gl, indices : Vec<GLuint>) -> EBO{
+    pub fn new(gl : &gl::Gl, indices : &Vec<GLuint>) -> EBO{
         let mut ebo: GLuint = 0;
 
         unsafe {

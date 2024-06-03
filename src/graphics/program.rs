@@ -1,6 +1,6 @@
-
+use std::ffi::CString;
 use gl;
-use gl::types::GLuint;
+use gl::types::{GLint, GLuint};
 
 use crate::graphics::{
     create_whitespace_cstring_with_len,
@@ -81,6 +81,15 @@ impl Program {
         unsafe {
             self.gl.UseProgram(self.id);
         }
+    }
+
+    pub fn get_uniform_id(&self, name : &str) -> GLint{
+        let mut uni_id : GLint;
+        unsafe {
+            let name = CString::new(String::from(name)).expect("CString::new failed");
+            uni_id = self.gl.GetUniformLocation(self.id, name.as_ptr());
+        }
+        uni_id
     }
 
 }
