@@ -1,8 +1,11 @@
 #![allow(warnings)]
 
 use std::ffi::{CString};
-use gl::types::{GLchar, GLsizei, GLuint, GLint};
+use std::path::Path;
+use gl::types::{GLsizei, GLuint, GLint};
 use sdl2::event::Event;
+use std::fs;
+use image::io::Reader as ImageReader;
 
 use crate::windsdl::Winsdl;
 
@@ -20,9 +23,10 @@ use graphics::{
     vao::*,
     ebo::*
 };
+use crate::graphics::texture::Texture;
 
 
-const WIDTH : usize = 800;
+const WIDTH : usize = 600;
 const HEIGHT : usize = 600;
 
 
@@ -54,26 +58,16 @@ fn main() {
         &[vert_shader, frag_shader]
     ).unwrap();
 
-    // Load vertices
+
     let vertices: Vec<f32> = vec![
-        // positions                        // colors
-
-        // X   // Y  // Z
-        -0.5,  -0.5 , 0.0,                  1.0, 0.0, 0.0,      // Lower left corner
-        0.5,   -0.5 , 0.0,                  0.0, 1.0, 0.0,      // Lower right corner
-        0.0,    0.5 , 0.0,                  0.0, 0.0, 1.0,      // Upper corner
-
-        -0.25,  0.0 , 0.0,                  0.0, 0.5, 0.5,      // Inner left
-         0.25,  0.0 , 0.0,                  0.5, 0.0, 0.5,      // Inner right
-         0.0,  -0.5 , 0.0,                  0.5, 0.5, 0.0,      // Inner down
-
+        // positions        // Color            // Texture
+        -0.5, -0.5, 0.0,    0.0, 0.0, 1.0,      0.0, 0.0,       // bottom left
+        -0.5,  0.5, 0.0,    0.5, 0.5, 0.5,      0.0, 1.0,       // top left
+         0.5,  0.5, 0.0,    1.0, 0.0, 0.0,      1.0, 1.0,       // top right
+         0.5, -0.5, 0.0,    0.0, 1.0, 0.0,      1.0, 0.0        // bottom right
     ];
 
-    let indices : Vec<GLuint> = vec![
-      0, 3, 5,      // Lower left triangle
-      3, 2, 4,      // Lower right triangle
-      5, 4, 1       // Upper triangle
-    ];
+    let indices: Vec<GLuint> = vec![0, 2, 1, 0, 3, 2];  // define the triangle indices
 
     let vao = VAO::new(&gl);
     vao.bind();
@@ -95,7 +89,7 @@ fn main() {
         &vbo,
         0,
         3,
-        (6 * std::mem::size_of::<f32>()) as gl::types::GLint,
+        (8 * std::mem::size_of::<f32>()) as GLint,
         std::ptr::null()
     );
 
@@ -104,8 +98,17 @@ fn main() {
         &vbo,
         1,
         3,
-        (6 * std::mem::size_of::<f32>()) as gl::types::GLint,
+        (8 * std::mem::size_of::<f32>()) as GLint,
         (3 * std::mem::size_of::<f32>()) as *const gl::types::GLvoid
+    );
+
+    // Texture colors
+    vao.link_attrib(
+        &vbo,
+        2,
+        2,
+        (8 * std::mem::size_of::<f32>()) as GLint,
+        (6 * std::mem::size_of::<f32>()) as *const gl::types::GLvoid
     );
 
     // Unbind everything
@@ -113,6 +116,16 @@ fn main() {
     vao.unbind();
     vbo.unbind();
     ebo.unbind();
+
+    // Texture
+    let path = Path::new("./assets/textures/pop_cat.png");
+    let img = ImageReader::open(path).unwrap().decode().unwrap().flipv().to_rgba8();
+
+    let texture = Texture::new(&gl, &img, gl::TEXTURE_2D);
+
+    texture.tex_uniform(String::from("tex0"), &shader_program, 0);
+
+    // Scale Uniform
 
     let mut uni_id : GLint;
 
@@ -142,18 +155,22 @@ fn main() {
 
         }
 
+
+
         unsafe {
             gl.Clear(gl::COLOR_BUFFER_BIT);
-        }
+            shader_program.set_used();
 
-        shader_program.set_used();
-        unsafe {
-            gl.Uniform1f(uni_id, 1.5);
+            // Scale
+            gl.Uniform1f(uni_id, 1.0);
+
+            // Texture
+            texture.bind();
 
             gl.BindVertexArray(vao.id);
             gl.DrawElements(
                 gl::TRIANGLES,
-                9,
+                6,
                 gl::UNSIGNED_INT,
                 0 as *const _
 

@@ -77,6 +77,12 @@ impl Program {
         self.id
     }
 
+    pub fn activate(&self){
+        unsafe {
+            self.gl.UseProgram(self.id);
+        }
+    }
+
 }
 
 impl Drop for Program {
