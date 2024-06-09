@@ -5,11 +5,7 @@ layout (location = 1) in vec3 Color;
 layout (location = 2) in vec2 Texture;
 
 
-uniform float scale;
-
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 proj;
+uniform mat4 camMatrix;
 
 out VS_OUTPUT {
     vec3 Color;
@@ -18,7 +14,7 @@ out VS_OUTPUT {
 
 void main()
 {
-    gl_Position = proj * view * model * vec4(Position.x * scale, Position.y * scale, Position.z * scale, 1.0);
+    gl_Position = camMatrix * vec4(Position.x, Position.y, Position.z, 1.0);
     OUT.Color = Color;
     OUT.Texture = Texture;
 }

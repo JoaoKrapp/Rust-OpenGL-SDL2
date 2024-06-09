@@ -8,6 +8,7 @@ pub mod vbo;
 pub mod vao;
 pub mod ebo;
 pub mod texture;
+pub mod camera;
 
 /// Given a source of shader and the type returns the shader ID
 fn shader_from_source(gl : &gl::Gl, source : &CStr, kind : gl::types::GLuint) -> Result<gl::types::GLuint, String> {
